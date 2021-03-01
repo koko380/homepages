@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="UTF-8">
+		<title>TensorFlow.js</title>
+		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+	</head>
+
+	<body>
+		<h1>TensorFlow.js</h1>
+			mnist(PNG)のデータは<a href="https://github.com/pjreddie/mnist-csv-png">こちら</a>からダウンロードしてください。 <br><br>
+
+			モデルの読み込み(JSON):
+				<input id="model_json_upload" type="file"> <br>
+			モデルの読み込み(Weights):
+				<input id="model_weights_upload" type="file"> <br>
+			モデルの送信(モデルを読み込んだ場合のみ):
+				<input id="model_load" type="button" value="モデル送信"> <br><br>
+
+			モデルの作成:
+				<input id="make_model" type="button" value="モデル作成"> <br><br>
+
+      画像ファイルの読み込み:
+	      <input id="csv_file" type="file" webkitdirectory> <br>
+			学習用のデータ作成:
+				<input id="change_tensor" type="button" value="データ作成"> <br>
+				<div id="file_load_status"></div> <br>
+
+<!--
+			学習データ:
+					<canvas id="train_image"></canvas>
+			検証データ:
+					<canvas id="train_image"></canvas>
+-->
+
+			<br>
+
+			第1中間層活性化関数:
+				<select id="middle_layer1_activation">
+					<option value="elu">elu</option>
+					<option value="hardSigmoid">hardSigmoid</option>
+					<option value="linear">linear</option>
+					<option value="relu" selected>relu</option>
+					<option value="relu6">relu6</option>
+					<option value="selu">selus</option>
+					<option value="sigmoid">sigmoid</option>
+					<option value="softmax">softmax</option>
+					<option value="softplus">softplus</option>
+					<option value="softsign">softsign</option>
+					<option value="tanh">tanh</option>
+				</select> <br>
+      第2中間層活性化関数:
+        <select id="middle_layer2_activation">
+          <option value="elu">elu</option>
+          <option value="hardSigmoid">hardSigmoid</option>
+          <option value="linear">linear</option>
+          <option value="relu" selected>relu</option>
+          <option value="relu6">relu6</option>
+          <option value="selu">selus</option>
+          <option value="sigmoid">sigmoid</option>
+          <option value="softmax">softmax</option>
+          <option value="softplus">softplus</option>
+          <option value="softsign">softsign</option>
+          <option value="tanh">tanh</option>
+        </select> <br>
+			出力層ユニット数:10 &nbsp
+      出力層活性化関数:
+        <select id="output_layer_activation">
+          <option value="elu">elu</option>
+          <option value="hardSigmoid">hardSigmoid</option>
+          <option value="linear">linear</option>
+          <option value="relu">relu</option>
+          <option value="relu6">relu6</option>
+          <option value="selu">selus</option>
+          <option value="sigmoid">sigmoid</option>
+          <option value="softmax" selected>softmax</option>
+          <option value="softplus">softplus</option>
+          <option value="softsign">softsign</option>
+          <option value="tanh">tanh</option>
+        </select> <br><br>
+
+      バッチサイズ(Batch Size):
+        <input id="batch_size" type="number" value="32"> <br>
+
+			学習率(learning rate):
+				<input id="learning_rate" type="number" step="0.01" value="0.15"> <br>
+
+			最適化アルゴリズム(Optimizer Algorithm):
+        <select id="optimizer_algorithm">
+          <option value="sgd" selected>sgd</option>
+					<option value="momentum">momentum</option>
+          <option value="adagrad">adagrad</option>
+          <option value="adadelta">adadelta</option>
+          <option value="adam">adam</option>
+          <option value="adamax">adamax</option>
+					<option value="rmsprop">rmsprop</option>
+        </select> <br>
+
+			損失関数(Loss):
+        <select id="loss_function">
+          <option value="absoluteDifference">absoluteDifference</option>
+          <option value="computeWeightedLoss">computeWeightedLoss</option>
+          <option value="cosineDistance">cosineDistance</option>
+          <option value="hingeLoss">hingeLoss</option>
+          <option value="huberLoss">huberLoss</option>
+          <option value="logLoss">logLoss</option>
+          <option value="meanSquaredError">meanSquaredError</option>
+					<option value="sigmoidCrossEntropy">sigmoidCrossEntropy</option>
+					<option value="softmaxCrossEntropy">softmaxCrossEntropy</option>
+					<option value="binaryAccuracy">binaryAccuracy</option>
+					<option value="binaryCrossentropy">binaryCrossentropy</option>
+					<option value="categoricalAccuracy">categoricalAccuracy</option>
+					<option value="categoricalCrossentropy" selected>categoricalCrossentropy</option>
+					<option value="cosineProximity">cosineProximity</option>
+					<option value="meanAbsoluteError">meanAbsoluteError</option>
+					<option value="meanAbsolutePercentageError">meanAbsolutePercentageError</option>
+					<option value="precision">precision</option>
+					<option value="recall">recall</option>
+					<option value="sparseCategoricalAccuracy">sparseCategoricalAccuracy</option>
+        </select> <br>
+
+			学習回数(Epoch):
+				<input id="epoch_number" type="number" value="300"> <br><br>
+
+			学習開始:
+				<input id="learn_start" type="button" value="学習開始"><br>
+				<div id="learn_status"></div> <br>
+
+			評価データ:
+				<input id="estimate_image_file" type="file"> <br>
+
+			評価結果:
+<!--
+				<input id="estimate" type="button" value="評価結果の表示"><br>
+-->
+				<div id="estimate_result"></div> <br>
+
+			モデルの保存:
+				<input id="model_save" type="button" value="モデルの保存"><br>
+
+			学習の初期化:
+				<input id="learn_initialize" type="button" value="初期化"><br><br>
+
+			参考:<a href="https://qiita.com/halboujp/items/075d74a08c4144cd79cd">TensorFlow.jsで手入力数字の認識を学習させてみた(初歩の初歩/その3)</a>
+
+		<script type="text/javascript" src="./js/AI_mnist.js"></script>
+	</body>
+</html>

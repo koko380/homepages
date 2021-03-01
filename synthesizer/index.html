@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset=" UTF-8">
+  <title> Web Audio API </title>
+  <link href="css/waa.css" rel="stylesheet" type="text/css">
+	<noscript>お使いのブラウザはJavaScriptに対応しておりません。</noscript>
+</head>
+
+<body>
+	<h1>Web Audio API</h1>
+
+	<ul id="start_stop">
+		<h2>開始/停止</h2>
+			<li>Start</li>
+				<input type="button" id="start_button" value="▶︎">
+
+			<li>Stop</li>
+				<input type="button" id="stop_button" value="■">
+	</ul>
+
+	<ul id="voice">
+		<h2>ボイス</h2>
+			<li>Frequency: <input type="text" id="frequency_range" value="440">Hz</li>
+			<!--
+			<li>Glide: <output id="glide">80</output>ms</li>
+       <input type="range" id="glide_range" value="80" min="0" max="5000" step="1" oninput="document.getElementById('glide').value=this.value">
+			-->
+	</ul>
+
+	<ul id="oscillator1">
+		<h2>Oscillator1</h2>
+
+		<li>On/Off</li>
+			<input type="button" id="oscillator1_on" value="On" oninput="document.getElementById('octave1').value=this.value">
+			<input type="button" id="oscillator1_off" value="Off">
+
+    <li>Wave Type</li>
+      <select name="wave_type" id="wave_type1">
+        <option value="sine">正弦波</option>
+        <option value="triangle">三角波</option>
+        <option value="sawtooth">ノコギリ波</option>
+        <option value="square">矩形波</option>
+        <option value="custom">カスタム波</option>
+      </select>
+
+    <li>Octave: <output id="octave1">0</output></li>
+       <input type="range" id="octave_range1" value="0" min="-3" max="2" step="1" oninput="document.getElementById('octave1').value=this.value">
+
+    <li>Coarse: <output id="coarse1">0</output>semi</li>
+       <input type="range" id="coarse_range1" value="0" min="-12" max="12" step="1" oninput="document.getElementById('coarse1').value=this.value">
+
+    <li>Fine: <output id="fine1">0</output>cent</li>
+       <input type="range" id="fine_range1" value="0" min="-100" max="100" step="1" oninput="document.getElementById('fine1').value=this.value">
+
+		<!--
+    <li>Volume: <output id="volume1">100</output>%</li>
+       <input type="range" id="volume_range1" value="100" min="0" max="100" step="1" oninput="document.getElementById('volume1').value=this.value">
+		-->
+	</ul><br>
+
+  <ul id="oscillator2">
+    <h2>Oscillator2</h2>
+
+    <li>On/Off</li>
+      <input type="button" id="oscillator2_on" value="On">
+      <input type="button" id="oscillator2_off" value="Off">
+
+    <li>Wave Type</li>
+      <select name="wave_type" id="wave_type2">
+        <option value="sine">正弦波</option>
+        <option value="triangle">三角波</option>
+        <option value="sawtooth">ノコギリ波</option>
+        <option value="square">矩形波</option>
+        <option value="custom">カスタム波</option>
+      </select>
+
+    <li>Octave: <output id="octave2">0</output></li>
+       <input type="range" id="octave_range2" value="0" min="-3" max="2" step="1" oninput="document.getElementById('octave2').value=this.value">
+
+    <li>Coarse: <output id="coarse2">0</output>semi</li>
+       <input type="range" id="coarse_range2" value="0" min="-12" max="12" step="1" oninput="document.getElementById('coarse2').value=this.value">
+
+    <li>Fine: <output id="fine2">0</output>cent</li>
+       <input type="range" id="fine_range2" value="0" min="-100" max="100" step="1" oninput="document.getElementById('fine2').value=this.value">
+  </ul><br>
+
+  <ul id="oscillator3">
+    <h2>Oscillator3</h2>
+
+    <li>On/Off</li>
+      <input type="button" id="oscillator3_on" value="On">
+      <input type="button" id="oscillator3_off" value="Off">
+
+    <li>Wave Type</li>
+      <select name="wave_type" id="wave_type3">
+        <option value="sine">正弦波</option>
+        <option value="triangle">三角波</option>
+        <option value="sawtooth">ノコギリ波</option>
+        <option value="square">矩形波</option>
+        <option value="custom">カスタム波</option>
+      </select>
+
+    <li>Octave: <output id="octave3">0</output></li>
+       <input type="range" id="octave_range3" value="0" min="-3" max="2" step="1" oninput="document.getElementById('octave3').value=this.value">
+
+    <li>Coarse: <output id="coarse3">0</output>semi</li>
+       <input type="range" id="coarse_range3" value="0" min="-12" max="12" step="1" oninput="document.getElementById('coarse3').value=this.value">
+
+    <li>Fine: <output id="fine3">0</output>cent</li>
+       <input type="range" id="fine_range3" value="0" min="-100" max="100" step="1" oninput="document.getElementById('fine3').value=this.value">
+  </ul><br>
+
+  <ul id="noise">
+		<h2>ノイズ</h2>
+	    <li>White Noise</li>
+  	    <input type="button" id="white_noise_on" value="On">
+    	  <input type="button" id="white_noise_off" value="Off">
+	</ul><br>
+
+	<ul id="filter">
+		<h2>Filter</h2>
+			<li>Filter Type</li>
+	      <select name="filter_type" id="filter_type">
+  	      <option value="low_pass">ローパスフィルター</option>
+    	    <option value="high_pass">ハイパスフィルター</option>
+      	  <option value="band_pass">バンドパスフィルター</option>
+        	<option value="notch">ノッチフィルター</option>
+	        <option value="low_shelving">ローシェルビングフィルター</option>
+  	      <option value="high_shelving">ハイシェルビングフィルター</option>
+    	    <option value="peaking">ピーキングフィルター</option>
+      	  <option value="all_pass">オールパスフィルター</option>
+      	</select> <br>
+
+		<li>Cutoff: <output id="cutoff">22000</output>Hz</li>
+	      <input type="range" id="cutoff_range" value="22000" min="10" max="22000" step="1" oninput="document.getElementById('cutoff').value=this.value">
+
+    <li>amount(Envelope): <output id="amount">0</output>%</li>
+        <input type="range" id="amount_range" value="0" min="-100" max="100" step="1" oninput="document.getElementById('amount').value=this.value">
+
+		<li>Frequency Q: <output id="q">1</output></li>
+        <input type="range" id="q_range" value="1" min="0" max="10" step="1" oninput="document.getElementById('q').value=this.value">
+
+		<li>resonance: <output id="resonance">0</output></li>
+        <input type="range" id="resonance_range" value="0" min="0" max="100" step="1" oninput="document.getElementById('resonance').value=this.value">
+
+    <li>Filter Envelope Generator</li>
+      Filter Attack: <output id="fil_attack">0</output>ms<br>
+        <input type="range" id="fil_attack_range" value="0" min="0" max="30000" step="1" oninput="document.getElementById('fil_attack').value=this.value"><br>
+      Filter Decay: <output id="fil_decay">27</output>ms<br>
+        <input type="range" id="fil_decay_range" value="27" min="0" max="30000" step="1" oninput="document.getElementById('fil_decay').value=this.value"><br>
+      Filter Sustain: <output id="fil_sustain">100</output>%<br>
+        <input type="range" id="fil_sustain_range" value="100" min="0" max="100" step="1" oninput="document.getElementById('fil_sustain').value=this.value"><br>
+      Filter Release: <output id="fil_release">27</output>ms<br>
+        <input type="range" id="fil_release_range" value="0" min="0" max="30000" step="1" oninput="document.getElementById('fil_release').value=this.value"><br>
+	</ul><br>
+
+	<ul id="volume">
+		<h2>ボリューム</h2>
+			<li>Master Volume: <output id="master_volume">1</output></li>
+				<input type="range" id="volume_range" value="1" min="0" max="10" step="0.5" oninput="document.getElementById('master_volume').value=this.value">
+
+			<li>Volume Envelope Generator</li>
+	      Volume Attack: <output id="vol_attack">0</output>ms<br>
+  	      <input type="range" id="vol_attack_range" value="0" min="0" max="30000" step="1" oninput="document.getElementById('vol_attack').value=this.value"><br>
+    	  Volume Decay: <output id="vol_decay">27</output>ms<br>
+      	  <input type="range" id="vol_decay_range" value="27" min="0" max="30000" step="1" oninput="document.getElementById('vol_decay').value=this.value"><br>
+	      Volume Sustain: <output id="vol_sustain">100</output>%<br>
+  	      <input type="range" id="vol_sustain_range" value="100" min="0" max="100" step="1" oninput="document.getElementById('vol_sustain').value=this.value"><br>
+	      Volume Release: <output id="vol_release">27</output>ms<br>
+  	      <input type="range" id="vol_release_range" value="0" min="0" max="30000" step="1" oninput="document.getElementById('vol_release').value=this.value"><br>
+	</ul>
+
+	<ul id="pan">
+		<h2>パン</h2>
+			<li>Pan: <output id="main_pan">0</output></li>
+  	    <input type="range" id="pan_range" value="0" min="-100" max="100" step="1" oninput="document.getElementById('main_pan').value=this.value">
+	</ul>
+
+	<script type="text/javascript" src="./js/waa.js"></script>
+</body>
+
+</html>

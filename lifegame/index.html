@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+ 
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    
+    <title>ライフゲーム</title>
+    <meta name="description" content="思いたったらすぐ開発. プログラミングに革命を..." />
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js"></script>
+  </head>
+  <body>
+    <h1>Conway's Game of Life</h1>
+    <canvas id="canvas" width="300" height="150"></canvas> <br>
+    <input id="start_stop" type="button" value="start">
+    <input id="next" type="button" value="next"> <br>
+    <input id="reset" type="button" value="reset">
+    <input id="random" type="button" value="random"> <br>
+    更新の速度:fast <input id="slide_bar" type="range" min="1" max="1000" step="10" value="100"> slow <br>
+    世代:<span id="generation">0</span>世代 <br>
+    セルの個数:<span id="cell_quantity">0</span>個
+  </body>
+</html>

@@ -1,0 +1,80 @@
+#start_stop{
+	background: #CCFFFF;
+	width: 150px;
+	height: 200px;
+	position: absolute;
+	top: 70px;
+	left: 0px;
+}
+
+#voice{
+  background: #CCFFCC;
+  width: 200px;
+  height: 200px;
+  position: absolute;
+  top: 70px;
+  left: 190px;
+}
+
+#oscillator1{
+  background: #CCFF99;
+  width: 220px;
+  height: 350px;
+  position: absolute;
+  top: 270px;
+  left: 0px;
+}
+
+#oscillator2{
+  background: #CCFF66;
+  width: 220px;
+  height: 350px;
+  position: absolute;
+  top: 270px;
+  left: 220px;
+}
+
+#oscillator3{
+  background: #CCFF33;
+  width: 220px;
+  height: 350px;
+  position: absolute;
+  top: 270px;
+  left: 440px;
+}
+
+#noise{
+  background: #CCFF00;
+  width: 180px;
+  height: 350px;
+  position: absolute;
+  top: 270px;
+  left: 660px;
+}
+
+#filter{
+  background: #CCCCFF;
+  width: 220px;
+  height: 600px;
+  position: absolute;
+  top: 620px;
+  left: 0px;
+}
+
+#volume{
+  background: #CCCCCC;
+  width: 220px;
+  height: 600px;
+  position: absolute;
+  top: 620px;
+  left: 260px;
+}
+
+#pan{
+  background: #CCCC99;
+  width: 220px;
+  height: 600px;
+  position: absolute;
+  top: 620px;
+  left: 520px;
+}
