@@ -48,11 +48,12 @@ workMenu.addEventListener("click", event => {
   contentShow();
 });
 
-window.onload = function(){
+window.onload = async function(){
 	let loading = document.getElementsByClassName("loading")[0];
-  if(loading.classList.contains("loadingShow") === false){
-    loading.classList.add("loadingShow");
-  } else {
-    loading.classList.remove("loadingShow");
-  }
+  await new Promise(function(resolve, reject){
+    setTimeout(() => {
+      loading.classList.add("loadingShow");
+      resolve();
+    }, 3000);
+  });
 }
