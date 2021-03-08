@@ -1,0 +1,184 @@
+body{
+  font-size: 16px;
+}
+
+h1{
+	background-color: silver;
+	border-left: double 12px grey;
+	border-right: double 12px grey;
+	text-align: center;
+}
+
+/*ボタン*/
+.button{
+  position: relative;
+  border: 1px solid #333;
+  color: #333;
+  transition: .3s;
+}
+
+.button:hover{
+  color: #fff;
+}
+
+.button::before, .button::after{
+  position: absolute;
+  top: 0;
+  z-index: -1;
+  content: "";
+  width: 50%;
+  height: 100%;
+  background-color: #333;
+  transform: scale(0, 1);
+  transition: transform .3s;
+}
+
+.button:before{
+  left: 0;
+  transform-origin: left top;
+}
+
+.button::after{
+  right: 0;
+  transform-origin: right top;
+}
+
+.button:hover::before, .button:hover::after{
+  transform: scale(1, 1);
+}
+
+/*スクロール出現*/
+.scroll{
+	opacity: 0;
+	transition: all .5s ease;
+	transform: translate(0, 100px);
+}
+
+.scrollShow{
+	opacity: 1;
+	transform: none;
+}
+
+/*ヘッダー*/
+.header{
+	position: fixed;
+	font-size: 24px;
+  top: 0;
+  right: 0;
+  display: flex;
+  height: 50px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  z-index: 80;
+  background-color: silver;
+}
+
+/*ヘッダーの空白*/
+.headerSpace{
+	height: 50px;
+	width: 100%;
+}
+
+/*メニューのヘッダー*/
+.headerMenu{
+	font-size: 24px;
+	display: flex;
+	height: 50px;
+  width: 100%;
+	justify-content: center;
+  align-items: center;
+	color: white;
+}
+
+/*ハンバーガーメニュー*/
+.menu{
+	position: fixed;
+	top: 0;
+	right: 0;
+	display: flex;
+	height: 50px;
+	width: 50px;
+	justify-content: center;
+	align-items: center;
+	z-index: 90;
+	background-color: silver;
+}
+
+.menu span,
+.menu span::before,
+.menu span::after{
+	content: '';
+	display: block;
+	height: 3px;
+	width: 25px;
+	border-radius: 3px;
+	background-color: white;
+	position: absolute;
+	transition: all .3s ease;
+}
+
+.menu span::before{
+	bottom: 8px;
+}
+
+.menu span::after{
+  top: 8px;
+}
+
+.menu:hover span{
+	background-color: rgba(255, 255, 255, 0);
+}
+
+.menu:hover span::before{
+	transform: rotate(-45deg);
+	bottom: 0;
+}
+
+.menu:hover span::after{
+	transform: rotate(45deg);
+	top: 0;
+}
+
+/*メニュー*/
+.content {
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top: 0;
+	left: 100%;
+	z-index: 80;
+	background-color: grey;
+	transition: all .5s ease;
+}
+.content ul {
+	padding: 70px 10px 0;
+}
+.content ul li {
+	border-bottom: solid 1px #ffffff;
+	list-style: none;
+}
+.content ul li a {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	color: white;
+	text-decoration: none;
+	padding: 9px 15px 10px 0;
+	position: relative;
+}
+.content ul li a::before {
+	content: "";
+	width: 7px;
+	height: 7px;
+	border-top: solid 2px #ffffff;
+	border-right: solid 2px #ffffff;
+	transform: rotate(45deg);
+	position: absolute;
+	right: 11px;
+	top: 16px;
+}
+
+.contentShow{
+	left: 0;
+}
