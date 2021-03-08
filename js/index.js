@@ -49,4 +49,10 @@ workMenu.addEventListener("click", event => {
 });
 
 window.onload = function(){
+	let loading = document.getElementsByClassName("loading")[0];
+  if(loading.classList.contains("loadingShow") === false){
+    loading.classList.add("loadingShow");
+  } else {
+    loading.classList.remove("loadingShow");
+  }
 }

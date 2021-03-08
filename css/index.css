@@ -53,6 +53,75 @@ h1{
 	transform: none;
 }
 
+/*ローディング画面*/
+.loading{
+	width: 100vw;
+	height: 100vh;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 100;
+}
+.loadingShow{
+	opacity: 0;
+	visibility: hidden;
+}
+#loadingLine{
+	width: 80%;
+	height: 3px;
+	position: fixed;
+	top: 50%;
+	left: 10%;
+	background-color: silver;
+}
+#loadingPoint{
+	width: 5%;
+  height: 3px;
+  position: fixed;
+  top: 50%;
+  left: 10%;
+  background-color: black;
+	animation: loading1 1.5s linear infinite;
+}
+#nowLoading{
+display: flex;
+	width: 80%;
+  height: 3px;
+  position: fixed;
+  top: 55%;
+  left: 10%;
+	font-size: 32px;
+	justify-content: center;
+  align-items: center;
+  color: black;
+	animation: loading2 1.5s linear infinite;
+}
+@keyframes loading1{
+	0%{
+		left: 10%;
+	}
+	100%{
+		left: 85%;
+	}
+}
+@keyframes loading2{
+  0%{
+    opacity: 1;
+  }
+	25%{
+    opacity: 0.25;
+  }
+  50%{
+    opacity: 1;
+  }
+	75%{
+    opacity: 0.25;
+  }
+	100%{
+    opacity: 1;
+  }
+}
+
 /*ヘッダー*/
 .header{
 	position: fixed;
