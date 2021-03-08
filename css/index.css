@@ -16,11 +16,9 @@ h1{
   color: #333;
   transition: .3s;
 }
-
 .button:hover{
   color: #fff;
 }
-
 .button::before, .button::after{
   position: absolute;
   top: 0;
@@ -32,17 +30,14 @@ h1{
   transform: scale(0, 1);
   transition: transform .3s;
 }
-
 .button:before{
   left: 0;
   transform-origin: left top;
 }
-
 .button::after{
   right: 0;
   transform-origin: right top;
 }
-
 .button:hover::before, .button:hover::after{
   transform: scale(1, 1);
 }
@@ -53,7 +48,6 @@ h1{
 	transition: all .5s ease;
 	transform: translate(0, 100px);
 }
-
 .scrollShow{
 	opacity: 1;
 	transform: none;
@@ -104,7 +98,6 @@ h1{
 	z-index: 90;
 	background-color: silver;
 }
-
 .menu span,
 .menu span::before,
 .menu span::after{
@@ -117,24 +110,19 @@ h1{
 	position: absolute;
 	transition: all .3s ease;
 }
-
 .menu span::before{
 	bottom: 8px;
 }
-
 .menu span::after{
   top: 8px;
 }
-
 .menu:hover span{
 	background-color: rgba(255, 255, 255, 0);
 }
-
 .menu:hover span::before{
 	transform: rotate(-45deg);
 	bottom: 0;
 }
-
 .menu:hover span::after{
 	transform: rotate(45deg);
 	top: 0;
@@ -178,7 +166,6 @@ h1{
 	right: 11px;
 	top: 16px;
 }
-
 .contentShow{
 	left: 0;
 }
