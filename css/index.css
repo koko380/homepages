@@ -61,6 +61,7 @@ h1{
 	top: 0;
 	left: 0;
 	z-index: 100;
+	background-color: grey;
 }
 .loadingShow{
 	opacity: 0;
