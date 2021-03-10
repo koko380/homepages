@@ -9,9 +9,11 @@ function scrollShow(){
     }
 	}
 }
+/*
 window.addEventListener("load", event => {
 	scrollShow();
 });
+*/
 window.addEventListener("scroll", event => {
   scrollShow();
 });
@@ -53,6 +55,7 @@ window.onload = async function(){
   await new Promise(function(resolve, reject){
     setTimeout(() => {
       loading.classList.add("loadingShow");
+		  scrollShow();
       resolve();
     }, 3000);
   });
