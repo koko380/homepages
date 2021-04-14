@@ -19,7 +19,8 @@
 	transform: scale(0, 1);
 	transition: 0.5s;
 	left: 0;
-	transform-origin: left;
+	top:0
+	transform-origin: left top;
 }
 
 #playVideo:hover::before{
