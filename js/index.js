@@ -50,6 +50,11 @@ workMenu.addEventListener("click", event => {
   contentShow();
 });
 
+window.addEventListener("load", ()=>{
+	let loading = document.getElementsByClassName("loading")[0];
+	loading.classList.add("loadingShow");
+	scrollShow();
+})
 /*
 window.onload = async function(){
 	let loading = document.getElementsByClassName("loading")[0];
