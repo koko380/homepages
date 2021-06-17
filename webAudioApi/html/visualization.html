@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>OscillatorNode</title>
+    <link href="css/mod.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <body>
+		<h3>AnalyserNode</h3>
+		<p>
+			Web Audio APIには、波形描画するためのAnalyserNodeオブジェクトが定義されています。<br>
+			時間領域の波形データを取得する際はgetByteTimeDomainDataメソッド、周波数領域の波形データを取得する際はgetByteFrequencyDataメソッドをそれぞれ使用してください。<br>
+			両メソッドともUint8Array型の配列を引数としています。<br><br>
+			AnalyserNodeのプロパティやメソッドは<a href="https://www.g200kg.com/jp/docs/webaudio/paramlist.html#analyser" target="_blank" rel="noopener noreferrer">こちら</a>を参照してください。
+		</p>
+
+		<div class="sampleCode">
+    <div class="caption">html側</div>
+      <pre><code>&lt;button id="playBtn"&gt;Play&lt;/button&gt;
+
+&lt;button id="stopBtn"&gt;Stop&lt;/button&gt;
+
+&lt;input type="range" id="volSlider" min=0 max=1 step=0.1 value=1&gt;
+
+&lt;select id="typeSelect"&gt;
+  &lt;option value="sine"&gt;正弦波&lt;/option&gt;
+  &lt;option value="square"&gt;矩形波&lt;/option&gt;
+  &lt;option value="sawtooth"&gt;ノコギリ波&lt;/option&gt;
+  &lt;option value="triangle"&gt;三角波&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;input type="number" id="frequencyNumber" min=20 max=20000 value=440&gt;
+
+&lt;select id="fftSizeSelect"&gt;
+  &lt;option value=32&gt;32&lt;/option&gt;
+  &lt;option value=64&gt;64&lt;/option&gt;
+  &lt;option value=128&gt;128&lt;/option&gt;
+  &lt;option value=256&gt;256&lt;/option&gt;
+  &lt;option value=512&gt;12&lt;/option&gt;
+  &lt;option value=1024&gt;1024&lt;/option&gt;
+  &lt;option value=2048 selected&gt;2048&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;canvas id="canvas" width="500" height="500"&gt;&lt;/canvas&gt;</code></pre>
+    </div>
+
+		<div class="sampleCode">
+    <div class="caption">visualization.js</div>
+      <pre><code>window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+let audioCtx = new AudioContext();
+
+let destinationNode = audioCtx.destination;
+
+let volumeNode = audioCtx.createGain();
+
+//analyserNodeを作成
+let analyserNode = audioCtx.createAnalyser();
+
+//高速フーリエ変換のデータサイズ(2のべき乗)
+analyserNode.fftSize = 2048;
+
+let canvas = document.getElementById("canvas");
+let canvasCtx = canvas.getContext("2d");
+
+let playBtn = document.getElementById("playBtn");
+playBtn.addEventListener("click", async function(){
+  await audioCtx.resume();
+
+  let oscillatorNode = audioCtx.createOscillator();
+
+  //接続:oscillatorNode =&gt; volumeNode =&gt; analyserNode
+  oscillatorNode.connect(volumeNode).connect(analyserNode);
+  //接続:oscillatorNode =&gt; volumeNode =&gt; destinationNode
+  oscillatorNode.connect(volumeNode).connect(destinationNode);
+
+  let volSlider = document.getElementById("volSlider");
+  volSlider.addEventListener("input", function(event){
+    volumeNode.gain.value = event.currentTarget.value;
+  });
+
+  let typeSelect = document.getElementById("typeSelect");
+  typeSelect.addEventListener("change", function(event){
+    oscillatorNode.type = event.currentTarget.value;
+  });
+  oscillatorNode.type = document.getElementById("typeSelect").value;
+
+  let frequencyNumber = document.getElementById("frequencyNumber");
+  frequencyNumber.addEventListener("input", function(event){
+    oscillatorNode.frequency.value = event.currentTarget.value;
+  });
+  oscillatorNode.frequency.value = document.getElementById("frequencyNumber").value;
+
+  //fftSizeが変更された時の処理
+  let fftSizeSelectSelect = document.getElementById("fftSizeSelect");
+  fftSizeSelect.addEventListener("change", function(event){
+    analyserNode.fftSize = event.currentTarget.value;
+  });
+
+  oscillatorNode.start(audioCtx.currentTime);
+  let intervalid = window.setInterval(function(){
+    //時間領域の波形描画に必要なデータを取得
+    let times = new Uint8Array(analyserNode.fftSize);
+    analyserNode.getByteTimeDomainData(times);
+
+    //周波数領域の波形(振幅スペクトル)描画に必要なデータを取得
+    //let spectrums = new Uint8Array(analyserNode.frequencyBinCount);
+    //analyserNode.getByteFrequencyData(spectrums);
+
+    canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+    canvasCtx.beginPath();
+
+    //オシロスコープ
+    for(let i=0; i&lt;times.length; i++){
+      //正規化(0〜1)
+      let x = (i/times.length) * canvas.width;
+      let y = (1-times[i]/255) * canvas.height;
+
+      //線の開始座標とパスを定義
+      if(i === 0){
+        canvasCtx.moveTo(x, y);
+      } else {
+        canvasCtx.lineTo(x, y);
+      }
+
+      //線を引く
+      canvasCtx.stroke();
+    }
+
+    //スペクトラム
+    /*
+    for(let i=0; i&lt;spectrums.length; i++){
+      //正規化(0〜1)
+      let x = (i/spectrums.length) * canvas.width;
+      let y = (1-spectrums[i]/255) * canvas.height;
+
+      //線の開始座標とパスを定義
+      if(i === 0){
+        canvasCtx.moveTo(x, y);
+      } else {
+        canvasCtx.lineTo(x, y);
+      }
+
+      //線を引く
+      canvasCtx.stroke();
+    }
+    */
+  }, 10);
+
+  let stopBtn = document.getElementById("stopBtn");
+  stopBtn.addEventListener("click", function(){
+    oscillatorNode.stop(0);
+    clearInterval(intervalid);
+    canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+});</code></pre>
+    </div>
+
+		<div class="demo">
+      <a href="./sample/oscilloscope.html" target="_blank" rel="noopener noreferrer">デモ:visualization.js(オシロスコープ)</a>
+    </div>
+
+		<div class="demo">
+      <a href="./sample/spectrum.html" target="_blank" rel="noopener noreferrer">デモ:visualization.js(スペクトラム)</a>
+    </div>
+	</body>
+</html>

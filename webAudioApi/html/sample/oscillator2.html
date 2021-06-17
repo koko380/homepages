@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>オシレーター2</title>
+  <head>
+
+  <body>
+	  再生ボタン:<button id="playBtn">Play</button><br>
+  	ボリューム:<input type="range" id="volSlider" min=0 max=1 step=0.1 value=1><br>
+		波形:<select id="typeSelect">
+			<option value="sine">正弦波</option>
+			<option value="square">矩形波</option>
+			<option value="sawtooth">ノコギリ波</option>
+			<option value="triangle">三角波</option>
+		</select><br>
+		周波数:<input type="number" id="frequencyNumber" min=20 max=20000 value=440>
+
+	  <script>
+  	  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+	    let audioCtx = new AudioContext();
+
+  	  let destinationNode = audioCtx.destination;
+
+    	let volumeNode = audioCtx.createGain();
+
+	    volumeNode.connect(destinationNode);
+
+  	  function play(){
+    	  let oscillatorNode = audioCtx.createOscillator();
+
+				//セレクターが変更された時の処理
+	      let typeSelect = document.getElementById("typeSelect");
+  	    typeSelect.addEventListener("change", function(event){
+					//波形を設定
+    	    oscillatorNode.type = event.currentTarget.value;
+      	});
+				oscillatorNode.type = typeSelect.value;
+
+	      //周波数が変更された時の処理
+  	    let frequencyNumber = document.getElementById("frequencyNumber");
+    	  frequencyNumber.addEventListener("input", function(event){
+					//周波数を設定
+      	  oscillatorNode.frequency.value = event.currentTarget.value;
+	      });
+				oscillatorNode.frequency.value = frequencyNumber.value;
+
+				//100で半音上、-100で半音下
+        //oscillatorNode.detune.value = 0;
+
+    	  oscillatorNode.connect(volumeNode);
+
+      	let t0 = audioCtx.currentTime;
+
+	      oscillatorNode.start(t0);
+
+  	    oscillatorNode.stop(t0+3);
+    	}
+
+	    let playBtn = document.getElementById("playBtn");
+  	  playBtn.addEventListener("click", function(){
+    	  play();
+	    });
+
+  	  let volSlider = document.getElementById("volSlider");
+    	volSlider.addEventListener("input", function(event){
+      	volumeNode.gain.value = event.currentTarget.value;
+	    });
+	  </script>
+  </body>
+</html> 

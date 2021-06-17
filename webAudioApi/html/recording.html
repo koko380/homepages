@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>OscillatorNode</title>
+    <link href="css/mod.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <body>
+		<h3>音声の書き出し</h3>
+		<p>
+			Web Audio APIで生成、加工した音をwavファイルに書き出したい場合は、以下のサンプルコードを使用してください。<br>
+			サンプルコードのplay関数の中身を変更して好きな処理を記述する形で使用してください。
+		</p>
+
+    <div class="sampleCode">
+    <div class="caption">html側</div>
+      <pre><code>&lt;button id="playBtn"&gt;Play&lt;/button&gt;
+&lt;button id="stopBtn"&gt;Stop&lt;/button&gt;
+&lt;button id="saveBtn"&gt;Save&lt;/button&gt;
+&lt;a href id="download"&gt;ダウンロード&lt;/a&gt;</code></pre>
+    </div>
+
+		<div class="sampleCode">
+    <div class="caption">record.js</div>
+      <pre><code>const recordProcessor =`
+  class Record extends AudioWorkletProcessor{
+    constructor() {
+      super();
+
+      this.chunkLeft = [];
+      this.chunkRight = [];
+      this.port.onmessage = (event) =&gt; {
+        this.port.postMessage({left:this.chunkLeft, right:this.chunkRight});
+      };
+    }
+
+    process(inputs, outputs, parameters){
+      let input = inputs[0];
+      let output = outputs[0];
+
+      for(let channel=0; channel&lt;output.length; channel++){
+        for(let i=0; i&lt;output[channel].length; i++){
+          if(input[channel]){
+            if(output.length == 1){
+              output[channel][i] = input[channel][i];
+              this.chunkLeft.push(output[channel][i]);
+              this.chunkRight.push(output[channel][i]);
+            } else if(output.length == 2){
+              if(channel === 0){
+                output[channel][i] = input[channel][i];
+                this.chunkLeft.push(output[channel][i]);
+              } else if(channel == 1){
+                output[channel][i] = input[channel][i];
+                this.chunkRight.push(output[channel][i]);
+              }
+            }
+          }
+        }
+      }
+      return true;
+    }
+  }
+  registerProcessor("Record", Record);
+`
+
+window.addEventListener("load",async function(){
+  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+  let audioCtx = new AudioContext();
+
+  let destinationNode = audioCtx.destination;
+
+  let chunkLeft = [];
+  let chunkRight = [];
+  let chunkLeftTmp = [];
+  let chunkRightTmp = [];
+
+  await audioCtx.audioWorklet.addModule("data:application/javascript,"+encodeURI(recordProcessor));
+
+  let recordNode = new AudioWorkletNode(audioCtx, "Record");
+
+  recordNode.port.onmessage = function(event){
+    chunkLeft = chunkLeftTmp.concat(event.data["left"]);
+    chunkLeftTmp = chunkLeft;
+    chunkRight = chunkRightTmp.concat(event.data["right"]);
+    chunkRightTmp = chunkRight;
+    make_wav(chunkLeft, chunkRight);
+  }
+
+  let saveBtn = document.getElementById("saveBtn");
+  saveBtn.addEventListener("click", function(){
+  recordNode.port.postMessage("");
+  });
+
+  function getWavBytes(buffer, options) {
+    const type = options.isFloat ? Float32Array : Uint16Array
+    const numFrames = buffer.byteLength / type.BYTES_PER_ELEMENT
+
+    const headerBytes = getWavHeader(Object.assign({}, options, { numFrames }))
+    const wavBytes = new Uint8Array(headerBytes.length + buffer.byteLength);
+
+    wavBytes.set(headerBytes, 0)
+    wavBytes.set(new Uint8Array(buffer), headerBytes.length)
+
+    return wavBytes
+  }
+
+
+  function getWavHeader(options) {
+    const numFrames =      options.numFrames
+    const numChannels =    options.numChannels || 2
+    const sampleRate =     options.sampleRate || 44100
+    const bytesPerSample = options.isFloat? 4 : 2
+    const format =         options.isFloat? 3 : 1
+
+    const blockAlign = numChannels * bytesPerSample
+    const byteRate = sampleRate * blockAlign
+    const dataSize = numFrames * blockAlign
+
+    const buffer = new ArrayBuffer(44)
+    const dv = new DataView(buffer)
+
+    let p = 0
+
+    function writeString(s) {
+      for (let i = 0; i &lt; s.length; i++) {
+        dv.setUint8(p + i, s.charCodeAt(i))
+      }
+      p += s.length
+    }
+
+    function writeUint32(d) {
+      dv.setUint32(p, d, true)
+      p += 4
+    }
+
+    function writeUint16(d) {
+      dv.setUint16(p, d, true)
+      p += 2
+    }
+
+    writeString('RIFF')              // ChunkID
+    writeUint32(dataSize + 36)       // ChunkSize
+    writeString('WAVE')              // Format
+    writeString('fmt ')              // Subchunk1ID
+    writeUint32(16)                  // Subchunk1Size
+    writeUint16(format)              // AudioFormat
+    writeUint16(numChannels)         // NumChannels
+    writeUint32(sampleRate)          // SampleRate
+    writeUint32(byteRate)            // ByteRate
+    writeUint16(blockAlign)          // BlockAlign
+    writeUint16(bytesPerSample * 8)  // BitsPerSample
+    writeString('data')              // Subchunk2ID
+    writeUint32(dataSize)            // Subchunk2Size
+
+    return new Uint8Array(buffer)
+  }
+
+
+  function make_wav(chunkLs, chunkRs){
+    let chunkL = new Float32Array(chunkLs);
+    let chunkR = new Float32Array(chunkRs);
+    let [left, right] = [chunkLs, chunkRs];
+    let interleaved = new Float32Array(left.length+right.length);
+    for(let src=0,dst=0; src&lt;left.length; src++,dst+=2){
+      interleaved[dst] = left[src];
+      interleaved[dst+1] = right[src];
+    }
+    const wavBytes = getWavBytes(interleaved.buffer, {
+      isFloat: true,
+      numChannels: 2,
+      //音源のサンプリングレートに合わせてここを変更
+      sampleRate: 44100
+    });
+    const wav = new Blob([wavBytes], { type: 'audio/wav' });
+
+    let download = document.getElementById("download");
+    download.href = URL.createObjectURL(wav);
+    download.setAttribute('download', 'audio.wav');
+  }
+
+  async function play(){
+    await audioCtx.resume();
+
+    //ここを変える
+    let oscillatorNode = audioCtx.createOscillator();
+
+    oscillatorNode.connect(recordNode).connect(destinationNode);
+
+    oscillatorNode.start(audioCtx.currentTime);
+
+    let stopBtn = document.getElementById("stopBtn")
+    stopBtn.addEventListener("click", function(){
+      oscillatorNode.stop(0);
+    });
+    //ここまで
+  }
+
+  let playBtn = document.getElementById("playBtn")
+  playBtn.addEventListener("click", function(){
+    play();
+  });
+});</code></pre>
+    </div>
+
+		<div class="demo">
+      <a href="./sample/audioWorkletRecord.html" target="_blank" rel="noopener noreferrer">デモ:record.js</a>
+    </div>
+
+	</body>
+</html>

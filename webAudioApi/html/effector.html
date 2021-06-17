@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>OscillatorNode</title>
+    <link href="css/mod.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <body>
+		<h3>エフェクター</h3>
+		<p>
+			本章では、音声を鳴らすことではなく、音声を加工する方法(エフェクター)を解説します。<br><br>
+			まず、エフェクターを作成する上で重要なLFO(Low Frequency Oscilator)について解説します。<br>
+			LFOは特定のパラメーターを時間経過とともに周期的に変化させる機能のことです。<br>
+			LFOを使用することで、トレモロやビブラートなどのエフェクターを作ることができます。<br><br>
+			LFOは、OscillatorNodeとGainNodeを利用することで作成できます。<br>
+		</p>
+
+		<div class="sampleCode">
+    <div class="caption">lfo</div>
+      <pre><code>let lfoNode = audioCtx.createOscillator();
+
+//depthはlfoのかかり具合の設定
+let depthNode = audioCtx.createGain();
+
+lfoNode.connect(depthNode).connect(AudioParam型のプロパティ);
+</code></pre>
+    </div>
+
+
+		<p>
+			以下に記載されたサンプルコードは、トレモロとビブラートを実装したものです。
+		</p>
+
+		<div class="sampleCode">
+    <div class="caption">html側</div>
+      <pre><code>&lt;button id="playBtn"&gt;Play&lt;/button&gt;
+&lt;button id="stopBtn"&gt;Stop&lt;/button&gt;
+&lt;input type="range" id="volSlider" min=0 max=1 step=0.1 value=1&gt;
+&lt;input type="range" id="lfoSlider" min=0 max=100 value=1&gt;
+&lt;input type="range" id="depthSlider" min=0 max=100 value=1&gt;</code></pre>
+    </div>
+
+		<div class="sampleCode">
+    <div class="caption">lfo.js</div>
+      <pre><code>window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+let audioCtx = new AudioContext();
+
+let destinationNode = audioCtx.destination;
+
+let volumeNode = audioCtx.createGain();
+
+volumeNode.connect(destinationNode);
+
+function play(){
+  let oscillatorNode = audioCtx.createOscillator();
+
+  oscillatorNode.connect(volumeNode);
+
+  //LFOノードを作成
+  let lfoNode = audioCtx.createOscillator();
+  //LFOスライダーが動いた時の処理
+  let lfoSlider = document.getElementById("lfoSlider");
+  lfoSlider.addEventListener("input", function(event){
+    lfoNode.frequency.value = event.currentTarget.value;
+  });
+  lfoNode.frequency.value = lfoSlider.value;
+
+  //LFOのかかり具合を設定するノードを作成
+  let depthNode = audioCtx.createGain();
+  //Depthスライダーが動いた時の処理
+  let depthSlider = document.getElementById("depthSlider");
+  depthSlider.addEventListener("input", function(event){
+    depthNode.gain.value = event.currentTarget.value;
+  });
+  depthNode.gain.value = depthSlider.value;
+
+  //接続:lfoNode =&gt; depthNode =&gt; volumeNode.gain(トレモロの場合)
+  lfoNode.connect(depthNode).connect(volumeNode.gain);
+
+  //接続:lfoNode =&gt; depthNode =&gt; oscillatorNode.frequency(ビブラートの場合)
+  //lfoNode.connect(depthNode).connect(oscillatorNode.frequency);
+
+  let t0 = audioCtx.currentTime;
+
+  oscillatorNode.start(t0);
+  lfoNode.start(t0)
+
+  let stopBtn = document.getElementById("stopBtn");
+  stopBtn.addEventListener("click", function(){
+    oscillatorNode.stop(0);
+    lfoNode.stop(0);
+  });
+}
+
+let playBtn = document.getElementById("playBtn");
+playBtn.addEventListener("click", function(){
+  play();
+});
+
+let volSlider = document.getElementById("volSlider");
+volSlider.addEventListener("input", function(event){
+  volumeNode.gain.value = event.currentTarget.value;
+});</code></pre>
+    </div>
+
+		<div class="demo">
+      <a href="./sample/tremolo.html" target="_blank" rel="noopener noreferrer">デモ:lfo.js(トレモロ)</a>
+    </div>
+
+		<div class="demo">
+      <a href="./sample/vibrato.html" target="_blank" rel="noopener noreferrer">デモ:lfo.js(ビブラート)</a>
+    </div>
+
+		<h3>オートパン</h3>
+		<p>
+			演習として、<a href="https://www.g200kg.com/jp/docs/webaudio/paramlist.html#stereopanner" target="_blank" rel="noopener noreferrer">StereoPannerNode</a>を用いてオートパンを実装してみましょう。<br>
+			パンとは音が聴こえる位置を意味していて、オートパンはパンを自動的に左右に振る効果を持つエフェクターのことです。
+		</p>
+
+		<div class="demo">
+      <a href="./sample/pan.html" target="_blank" rel="noopener noreferrer">デモ:オートパン</a>
+    </div>
+
+		<p>
+    	その他のエフェクターに関しては、<a href="http://curtaincall.weblike.jp/portfolio-web-sounder/webaudioapi-effectors/introduction" target="_blank" rel="noopener noreferrer">こちら</a>を参照して作成してみてください。
+    </p>
+	</body>
+</html>

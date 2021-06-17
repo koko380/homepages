@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>AudioBufferSourceNode</title>
+    <link href="css/mod.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <body>
+		<h3>AudioBufferSourceNode</h3>
+		<p>
+			Web Audio APIで、オーディオデータを再生する方法は2つあると解説しました。<br>
+			1つは、MediaElementAudioSourceNodeを利用して再生する方法です。<br>
+			本章では、もう1つの方法であるAudioBufferSourceNodeを利用してオーディオデータを再生する方法を解説します。<br><br>
+			AudioBufferSourceNodeを利用する場合は、AudioBufferSourceNodeのbufferプロパティにAudioBufferの値を格納する必要があります。<br><br>
+			では、AudioBufferを作るための手順を解説します。<br>
+			まず、オーディオデータをArrayBufferとして取得します。ArrayBufferとは、音声や動画像などのバイナリデータの配列です。<br>
+			次に、decodeAudioDataメソッドを用いることで、ArrayBufferをAudioBufferSourceNodeで扱える形式のAudioBufferに変換できます。<br><br>
+			AudioBufferSourceNodeのプロパティやメソッドは<a href="https://www.g200kg.com/jp/docs/webaudio/paramlist.html#buffersource" target="_blank" rel="noopener noreferrer">こちら</a>を参照してください。
+		</p>
+
+		<div class="sampleCode">
+    <div class="caption">html側</div>
+      <pre><code>&lt;button id="playBtn"&gt;Play&lt;/button&gt;
+&lt;button id="stopBtn"&gt;Stop&lt;/button&gt;
+
+&lt;input type="file" id="inputFile"&gt;</code></pre>
+    </div>
+
+		<div class="sampleCode">
+    <div class="caption">audioBufferSource.js</div>
+      <pre><code>window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+let audioCtx = new AudioContext();
+
+let destinationNode = audioCtx.destination;
+
+//HTMLのinputFile要素を取得
+let inputFile = document.getElementById("inputFile");
+
+//ファイルが挿入された時
+inputFile.addEventListener("change", function(event){
+
+  //1つ目のファイルを読み込む
+  let file = event.currentTarget.files[0];
+
+  //FileReaderを作成
+  let reader = new FileReader();
+
+  //読み込み完了時のイベント
+  reader.addEventListener("load", async function(){
+
+    //読み込み結果を変数に格納
+    let arrayBuffer = reader.result
+
+    //AudioBufferを作成
+    let audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+    let playBtn = document.getElementById("playBtn");
+    playBtn.addEventListener("click", async function(){
+      //AudiobufferSourceNodeを作成
+      let audioBufferSourceNode = audioCtx.createBufferSource();
+
+      //AudioBufferをAudioBufferSourceNodeのbufferプロパティに格納
+      audioBufferSourceNode.buffer = audioBuffer;
+
+      //接続:audioBufferSourceNode =&gt; destinationNode
+      audioBufferSourceNode.connect(destinationNode);
+
+      await audioCtx.resume();
+
+      //音源の再生
+      audioBufferSourceNode.start(audioCtx.currentTime);
+
+      let stopBtn = document.getElementById("stopBtn");
+      stopBtn.addEventListener("click", function(){
+        //音源の一時停止
+        audioBufferSourceNode.stop(audioCtx.currentTime);
+      });
+    });
+  });
+
+  //読み込みを実行
+  reader.readAsArrayBuffer(file);
+});</code></pre>
+    </div>
+
+		<div class="demo">
+      <a href="./sample/audioBuffer.html" target="_blank" rel="noopener noreferrer">デモ:audioBufferSource.js</a>
+    </div>
+
+		<p>
+			OscillatorNodeの章でも解説した通り、AudioBufferSourceNodeも使い捨てのノードです。<br>
+      音源を鳴らしたい場合は、その都度インスタンスを作成する必要があります。<br><br>
+      AudioBufferSourceNodeは、一般的には45秒未満の断片的な音源を保持するために設計されています。<br>
+      それよりも長い音源に関しては、MediaElementAudioSourceNodeで扱う方が適しています。
+    </p> 
+	</body>
+</html>
