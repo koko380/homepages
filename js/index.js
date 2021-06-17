@@ -50,6 +50,7 @@ workMenu.addEventListener("click", event => {
   contentShow();
 });
 
+/*
 window.onload = async function(){
 	let loading = document.getElementsByClassName("loading")[0];
   await new Promise(function(resolve, reject){
@@ -60,3 +61,4 @@ window.onload = async function(){
     }, 3000);
   });
 }
+*/
