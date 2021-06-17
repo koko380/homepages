@@ -5,7 +5,7 @@ function scrollShow(){
     if (window.innerHeight > scroll[i].getBoundingClientRect().top + 75) {
 	    scroll[i].classList.add('scrollShow');
     } else {
-  	  scroll[i].classList.remove('scrollShow');
+  	  //scroll[i].classList.remove('scrollShow');
     }
 	}
 }
