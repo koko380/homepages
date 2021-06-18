@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>AudioWorklet</title>
+  <head>
+
+  <body>
+		再生ボタン:<button id="playBtn">Play</button><br>
+    停止ボタン:<button id="stopBtn">Stop</button><br>
+		オーバードライブ:<input type="range" id="drvSlider" min=0 max=1 step=0.01 value=1>
+
+    <script>
+			const overdriveProcessor=`
+				class OverDrive extends AudioWorkletProcessor {
+				  constructor() {
+				    super();
+				  }
+
+					//AudioParamで管理される独自パラメーターを定義
+					//linearRampToValueAtTimeメソッドなどが使用可能に
+				  static get parameterDescriptors(){
+				    return [{
+				      name: "drive",
+				      defaultValue: 1,
+				      minValue: 0,
+				      maxValue: 1,
+				      automationRate: "a-rate"
+				    }];
+				  }
+
+				  process(inputs, outputs, parameters) {
+				    let input  = inputs[0];
+				    let output = outputs[0];
+				    let driveParameter = Math.pow(0.05, Math.abs(parameters.drive[0]));
+
+				    for (let channel=0; channel<output.length; channel++) {
+				      for(let i=0; i<output[channel].length; i++){
+				        if (input[channel]){
+									let d = input[channel][i]
+									if(d < 0){
+        				  	output[channel][i] = -Math.pow(-d ,driveParameter);
+									} else {
+										output[channel][i] = Math.pow(d ,driveParameter);
+									}
+				        }
+				      }
+				    }
+				    return true;
+				  }
+				}
+				registerProcessor("OverDrive", OverDrive);
+			`
+
+			window.addEventListener("load", async function(){
+				window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+	      let audioCtx = new AudioContext();
+
+	      let destinationNode = audioCtx.destination;
+
+				await audioCtx.audioWorklet.addModule("data:application/javascript,"+encodeURI(overdriveProcessor));
+
+	      async function play(){
+  	      await audioCtx.resume();
+
+					let oscillatorNode = audioCtx.createOscillator();
+
+  	      let overdriveNode = new AudioWorkletNode(audioCtx, "OverDrive");
+					let overdriveAudioParam = overdriveNode.parameters.get("drive");
+
+					let drvSlider = document.getElementById("drvSlider")
+          drvSlider.addEventListener("input", function(event){
+            overdriveAudioParam.value = event.currentTarget.value
+          });
+					overdriveAudioParam.value = drvSlider.value;
+
+      	  oscillatorNode.connect(overdriveNode).connect(destinationNode);
+
+					oscillatorNode.start(audioCtx.currentTime);
+
+					let stopBtn = document.getElementById("stopBtn")
+	        stopBtn.addEventListener("click", function(){
+  	        oscillatorNode.stop(0);
+    	    });
+  	    };
+
+	      let playBtn = document.getElementById("playBtn")
+				playBtn.addEventListener("click", function(){
+    	    play();
+      	});
+			});
+    </script>
+  </body>
+</html>

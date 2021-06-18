@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>OscillatorNode</title>
+    <link href="css/mod.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <body>
+		<h3>Web MIDI API</h3>
+		<p>
+			Web MIDI APIは、MIDIデバイスとブラウザー間で通信を行うことできるAPIです。<br>
+			<a href="http://www.amei.or.jp/midi2020.html" target="_blank" rel="noopener noreferrer">MIDI</a>とは電子楽器の演奏データを機器間でやりとりするための世界規格のことです。<br><br>
+			サンプルコードのnoteOn,noteOff関数にWeb Audio APIの処理を記述する形で使用してください。
+		</p>
+
+		<div class="sampleCode">
+    <div class="caption">webMidiApi.js</div>
+      <pre><code>window.addEventListener("load", async function (){
+  let midiAccess = await navigator.requestMIDIAccess({sysex: true});
+
+  let inputs = [];
+  let outputs = [];
+
+  let inputIterator = midiAccess.inputs.values();
+  let outputIterator = midiAccess.outputs.values();
+
+  for(let i=inputIterator.next(); !i.done; i=inputIterator.next()){
+    inputs.push(i.value);
+  }
+  for(let i=outputIterator.next(); !i.done; i=outputIterator.next()){
+    outputs.push(i.value);
+  }
+
+  if(inputs.length&gt;0){
+    inputs[0].onmidimessage = function(event){
+      switch(event.data[0] &amp; 0xf0){
+        case 0x90:
+          noteOn(event.data[1], event.data[2]);
+          break;
+        case 0x80:
+          noteOff(event.data[1], event.data[2]);
+          break;
+        default:
+          break;
+      }
+    };
+  }
+
+  if(outputs.length&gt;0){
+    //noteOn(第1引数はMIDIメッセージを格納した数値配列、第2引数にはMIDIメ>ッセージを送信する時刻を指定)
+    //outputs[0].send([0x90, 0x45, 0x3f], (window.performance.now()+0));
+  }
+
+  function noteOn(noteNumber, velocity){
+    //Web Audio APIで音源を鳴らす箇所
+
+    console.log(`0x90_noteNumber:${noteNumber}`);
+    console.log(`0x90_velocity:${velocity}`);
+  }
+
+  function noteOff(noteNumber, velocity){
+    //Web Audio APIで音源を止める箇所
+
+    console.log(`0x80_noteNumber:${noteNumber}`);
+    console.log(`0x80_velocity:${velocity}`);
+  }
+});</code></pre>
+    </div>
+
+    <div class="demo">
+      <a href="./sample/webMidiApi.html" target="_blank" rel="noopener noreferrer">デモ:webMidiApi.js</a>
+    </div>
+	</body>
+</html>

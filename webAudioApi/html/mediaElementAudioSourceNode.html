@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>MediaElementAudioSourceNode</title>
+		<link href="css/mod.css" rel="stylesheet" type="text/css">
+  <head>
+
+  <body>
+		<h3>MediaElementAudioSourceNode</h3>
+		<p>
+			Web Audio APIで、オーディオデータを再生する方法は2つあります。<br>
+			この章では、MediaElementAudioSourceNodeを用いて、オーディオデータを再生する方法を解説します。<br><br>
+			MediaElementAudioSourceNodeは、HTMLMediaElementをWeb Audio APIで扱うためのノードです。<br>
+			HTMLMediaElementとは、audioタグやvideoタグのことです。<br>
+			本章ではaudioタグで解説しますが、videoタグでも同様に適用できます。
+		</p>
+
+		<div class="sampleCode">
+    <div class="caption">html側</div>
+      <pre><code>&lt;button id="playBtn"&gt;Play&lt;/button&gt;
+
+&lt;button id="pauseBtn"&gt;Pause&lt;/button&gt;
+
+&lt;audio src="./sample.wav" id="audioSource"&gt;&lt;/audio&gt;</code></pre>
+    </div>
+
+		<div class="sampleCode">
+    <div class="caption">mediaElementAudioSource.js</div>
+			<pre><code>window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+let audioCtx = new AudioContext();
+
+let destinationNode = audioCtx.destination;
+
+//方法1(audioタグ必須)
+let audioSource = document.getElementById("audioSource");
+//方法2
+//let audioSource = new Audio("./sample.wav");
+//方法3
+//let audioSource = document.createElement("audio");
+//audioSource.setAttribute("src", "./sample.wav");
+
+//MediaElementAudioSourceノードを作成
+let MediaElementAudioSourceNode = audioCtx.createMediaElementSource(audioSource);
+
+//接続:MediaElementAudioSourceNode =&gt; destinationNode
+MediaElementAudioSourceNode.connect(destinationNode);
+
+let playBtn = document.getElementById("playBtn");
+playBtn.addEventListener("click", async function(){
+  await audioCtx.resume();
+  //音源の再生
+  audioSource.play();
+});
+
+let pauseBtn = document.getElementById("pauseBtn");
+pauseBtn.addEventListener("click", function(){
+  //音源の一時停止
+  audioSource.pause();
+});</code></pre>
+    </div>
+
+		<div class="demo">
+      <a href="./sample/mediaElement.html" target="_blank" rel="noopener noreferrer">デモ:mediaElementAudioSource.js</a>
+    </div>
+
+		<p>
+			音源を読み込む方法は3つあります。方法1だけHTMLのaudioタグが必須となります。<br>
+			また、動画を読み込む際は、方法2のインスタンスを作成する方法は使えません。<br><br>
+
+			Chromeでは、ローカルファイルの読み込みに制限があるため、sample.wavファイルにアクセスできません。<br>
+			対策としてサーバーを立てるか、ターミナルで以下のコマンドを入力してChromeを立ち上げてください。<br>
+		</p>
+
+		<div class="sampleCode">
+    <div class="caption">Chromeの起動オプション</div>
+      <pre><code>&lt;Windowsの場合&gt;
+Chrome --args -allow-file-access-from-files
+
+&lt;Macの場合&gt;
+open -a Google\ Chrome --args -allow-file-access-from-files</code></pre>
+    </div>
+
+	</body>
+</html>

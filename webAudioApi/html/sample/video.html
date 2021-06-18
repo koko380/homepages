@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>WebRTC</title>
+  <head>
+
+  <body>
+    <video id="video" autoplay playsinline="true"></video>
+
+    <script>
+      window.addEventListener("load", async function(){
+        let video = document.getElementById("video");
+
+        stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+
+        video.srcObject = stream;
+
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+        let audioCtx = new AudioContext();
+      
+        let destinationNode = audioCtx.destination;
+
+				//mediaStreamAudioAourceNodeを作成
+				let mediaStreamAudioSourceNode = audioCtx.createMediaStreamSource(stream);
+
+				//接続:mediaStreamAudioSourceNode =&gt; destinationNode
+				mediaStreamAudioSourceNode.connect(destinationNode);
+    });
+    </script>
+  </body>
+</html>

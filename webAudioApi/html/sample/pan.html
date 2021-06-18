@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>Pan</title>
+  <head>
+
+  <body>
+		再生ボタン:<button id="playBtn">Play</button><br>
+  	停止ボタン:<button id="stopBtn">Stop</button><br>
+	  ボリューム:<input type="range" id="volSlider" min=0 max=1 step=0.1 value=1><br>
+	  LFO:<input type="range" id="lfoSlider" min=0 max=5 value=1><br>
+  	Depth:<input type="range" id="depthSlider" min=0 max=1 step=0.1 value=1>
+
+	  <script>
+  	  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+	    let audioCtx = new AudioContext();
+
+  	  let destinationNode = audioCtx.destination;
+
+    	let volumeNode = audioCtx.createGain();
+
+			//StereoPannnerNodeを作成
+			let stereoPannerNode = audioCtx.createStereoPanner();
+
+			//接続:volumeNode => stereoPannerNode => destinationNode
+			volumeNode.connect(stereoPannerNode).connect(destinationNode);
+
+	    function play(){
+  	    let oscillatorNode = audioCtx.createOscillator();
+
+    	  oscillatorNode.connect(volumeNode);
+
+      	let lfoNode = audioCtx.createOscillator();
+				//LFOスライダーが動いた時の処理
+  	    let lfoSlider = document.getElementById("lfoSlider");
+    	  lfoSlider.addEventListener("input", function(event){
+      	  lfoNode.frequency.value = event.currentTarget.value;
+	      });
+  	    lfoNode.frequency.value = lfoSlider.value;
+
+	      let depthNode = audioCtx.createGain();
+				//Depthスライダーが動いた時の処理
+    	  let depthSlider = document.getElementById("depthSlider");
+      	depthSlider.addEventListener("input", function(event){
+	        depthNode.gain.value = event.currentTarget.value;
+  	    });
+				//左右+-100で動く
+	      depthNode.gain.value = depthSlider.value; 
+
+	      //接続:lfoNode => depthNode => stereoPannerNode.pan
+  	    lfoNode.connect(depthNode).connect(stereoPannerNode.pan);
+
+	      let t0 = audioCtx.currentTime;
+
+  	    oscillatorNode.start(t0);
+    	  lfoNode.start(t0)
+
+				let stopBtn = document.getElementById("stopBtn");
+  	    stopBtn.addEventListener("click", function(){
+    	    oscillatorNode.stop(0);
+      	  lfoNode.stop(0);
+	      });
+  	  }
+
+	    let playBtn = document.getElementById("playBtn");
+  	  playBtn.addEventListener("click", function(){
+    	  play();
+	    });
+
+	    let volSlider = document.getElementById("volSlider");
+  	  volSlider.addEventListener("input", function(event){
+    	  volumeNode.gain.value = event.currentTarget.value;
+	    });
+  	</script>
+  </body>
+</html>

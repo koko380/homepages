@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>OscillatorNode</title>
+    <link href="css/mod.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <body>
+		<h3>AudioParam</h3>
+		<p>
+			Web Audio APIには、AudioParamというオブジェクトがあります。<br>
+			OscillatorNodeのfrequency、GainNodeのgainがそれに当たります。
+			AudioParamは値を入れるだけでなく、オートメーション機能と他のノードの出力を受け付ける機能が備わっています。<br>
+			つまり、AudioParamの値を自動で動かしたり、connectメソッドの接続先にできます。<br><br>
+			本章では、<a href="https://www.g200kg.com/jp/docs/webaudio/audioparam.html" target="_blank" rel="noopener noreferrer">オートメーション機能</a>を解説します。また、エフェクターの章で他のノードの出力を受け付ける機能を解説します。<br><br>
+			oscillatorNode.frequency.linearRampToValueAtTime(100, audioCtx.currentTime+5)を例として解説していきます。<br>
+			oscillatorNodeにあるfrequencyプロパティはAudioParam型です。<br>
+			このfrequencyプロパティにオートメーション機能のメソッドであるlinearRampToValueAtTimeを適用することで、5秒間かけて100Hzになるように現在値から直線的に周波数が変化していきます。<br><br>
+			以下に記載されたサンプルコードは、<a href="https://www.g200kg.com/jp/docs/dic/adsr.html" target="_blank" rel="noopener noreferrer">ADSR</a>を実装したものです。
+		</p>
+
+		<div class="sampleCode">
+    <div class="caption">html側</div>
+      <pre><code>&lt;button id="playBtn"&gt;Play&lt;/button&gt;
+&lt;button id="stopBtn"&gt;Stop&lt;/button&gt;
+&lt;input type="range" id="volSlider" min=0 max=1 step=0.1 value=1&gt;
+&lt;input type="range" id="attackSlider" min=0 max=10 step=0.1 value=1&gt;
+&lt;input type="range" id="decaySlider" min=0 max=10 step=0.1 value=1&gt;
+&lt;input type="range" id="sustainSlider" min=0 max=1 step=0.1 value=0.5&gt;
+&lt;input type="range" id="releaseSlider" min=0 max=10 step=0.1 value=1&gt;
+</code></pre>
+    </div>
+
+		<div class="sampleCode">
+    <div class="caption">adsr.js</div>
+      <pre><code>window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+let audioCtx = new AudioContext();
+
+let destinationNode = audioCtx.destination;
+
+let volume = 1;
+
+//エンベロープジェネレーターノードを作成
+let egNode = audioCtx.createGain();
+
+//接続:egNode =&gt; destinationNode
+egNode.connect(destinationNode);
+
+//ADSRを設定
+let attack = 1.0;
+let decay = 1.0;
+let sustain = 0.5;
+let release = 1.0;
+
+//サウンド停止の検出
+let intervalid = null;
+
+let playBtn = document.getElementById("playBtn");
+playBtn.addEventListener("click", async function(event){
+  await audioCtx.resume();
+
+  let oscillatorNode = audioCtx.createOscillator();
+
+  //接続:oscillatorNode =&gt; egNode
+  oscillatorNode.connect(egNode);
+
+  let t0 = audioCtx.currentTime;
+
+  oscillatorNode.start(t0);
+
+  //初期音量
+  egNode.gain.setValueAtTime(0, t0);
+
+  let t1 = t0 + attack;
+
+  //アタック
+  egNode.gain.linearRampToValueAtTime(volume, t1);
+
+  let t2 = decay;
+
+  let t2Value = volume * sustain;
+
+  //ディケイ
+  egNode.gain.setTargetAtTime(t2Value, t1, t2);
+
+  let stopBtn = document.getElementById("stopBtn");
+  stopBtn.addEventListener("click", async function(event){
+    let t3 = audioCtx.currentTime;
+
+    let t4 = release;
+    //リリース
+    egNode.gain.setTargetAtTime(0, t3, t4);
+
+    intervalid = window.setInterval(()=&gt;{
+      if(egNode.gain.value &lt; 1e-3){
+        oscillatorNode.stop(0);
+
+        if(intervalid !== null){
+          window.clearInterval(intervalid);
+          intervalid = null;
+        }
+      }
+    }, 0);
+  });
+});
+
+let volSlider = document.getElementById("volSlider");
+volSlider.addEventListener("input", function(event){
+  volume = event.currentTarget.value;
+});
+
+let attackSlider = document.getElementById("attackSlider");
+attackSlider.addEventListener("input", function(event){
+  attack = Number(event.currentTarget.value);
+});
+
+let decaySlider = document.getElementById("decaySlider");
+decaySlider.addEventListener("input", function(event){
+  decay = Number(event.currentTarget.value);
+});
+
+let sustainSlider = document.getElementById("sustainSlider");
+sustainSlider.addEventListener("input", function(event){
+  sustain = Number(event.currentTarget.value);
+});
+
+let releaseSlider = document.getElementById("releaseSlider");
+releaseSlider.addEventListener("input", function(event){
+  release = Number(event.currentTarget.value);
+});</code></pre>
+    </div>
+
+		<div class="demo">
+      <a href="./sample/adsr.html" target="_blank" rel="noopener noreferrer">デモ:adsr.js</a>
+    </div>
+	</body>
+</html>

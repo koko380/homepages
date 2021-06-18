@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>AudioWorkletNode</title>
+    <link href="css/mod.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <body>
+		<h3>AudioWorklet</h3>
+		<p>
+			Web Audio APIが定義する標準ノードの組み合わせでは不可能な音声処理を実装したい場合は、AudioWorkletを使用します。<br>
+			AudioWorkletは直接サウンドデータにアクセスして演算することで、様々な音声処理を実現できます。<br><br>
+			AudioWorkletはScriptProcessorNodeの後継となります。では、なぜScriptProcessorNodeは廃止されるのでしょうか？<br>
+			ScriptProcessorNodeには、イベントが発生した際の処理が非同期で行われることで生じる音声の遅延とメインスレッドで動作することによるUIのカクつきや音声再生中の音切れという2つの問題があります。<br>
+			これらの問題が生じないようにAudioWorkletは、メインスレッドとは異なるAudioスレッドで動作するような仕様になっています。<br><br>
+			AudioWorkletは、AudioWorkletProcessorとAudioWorkletNodeの2つを利用することで実装できます。<br>
+			AudioWorkletProcessorはJavaScriptで記述された実際の音声処理のことです。また、AudioWorkletNodeはメインスレッドにおいて他のAudioNodeとAudioWorkletProcessorを繋げる役割を果たします。<br><br>
+			ここでは、実際の音声処理部分であるAudioWorkletProcessorについて解説します。<br>
+			まず、AudioWorkletProcessorを継承した独自クラスを作成します。<br>
+			この独自クラスのprocessメソッドに実際の音声処理を記述します。<br>
+			また、parameterDescriptorsメソッドには独自のAudioParamを設定することもできます。<br>
+			さらに、MessagePortによってAudioWorkletProcessorとAudioWorkletNodeは双方向で値のやり取りが可能となっています。<br><br>
+
+			独自クラスをメインスレッド上で利用するには、registerProcessorメソッドを用いてAudioWorkletGlobalScopeに登録する必要があります。<br><br>
+
+			上記の独自クラスをメインスレッドにあるAudioWorkletNodeで利用する際には、最初にaudioWorklet.addModuleメソッドを用います。<br>
+			その後、AudioWorkletNodeインスタンスを生成することで、独自のノードが使用可能になります。<br><br>
+			以下に記載されたサンプルコードは、乱数からノイズを生成するものです。
+		</p>
+
+    <div class="sampleCode">
+    <div class="caption">html側</div>
+      <pre><code>&lt;button id="playBtn"&gt;Play&lt;/button&gt;
+&lt;button id="stopBtn"&gt;Stop&lt;/button&gt;</code></pre>
+    </div>
+
+		<div class="sampleCode">
+    <div class="caption">noise.js</div>
+      <pre><code>const noiseProcessor=`
+  class Noise extends AudioWorkletProcessor {
+    constructor() {
+      super();
+
+      this.port.onmessage = event =&gt; {
+        console.log(event.data);
+        this.port.postMessage("pon");
+      }
+    }
+
+    //オーディオ処理の実装箇所
+    process(inputs, outputs, parameters) {
+      //複数の入出力があった場合、最初のinputs, outputsを取得
+      let input  = inputs[0];
+      let output = outputs[0];
+
+      for (let channel=0; channel&lt;output.length; channel++) {
+        for(let i=0; i&lt;output[channel].length; i++){
+          //乱数を出力に格納
+          output[channel][i] = 2*(Math.random()-0.5);
+        }
+      }
+      return true;
+    }
+  }
+  //"Noise"にNoiseクラスを登録
+  registerProcessor("Noise", Noise);
+`
+
+window.addEventListener("load", async function(){
+  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+  let audioCtx = new AudioContext();
+
+  let destinationNode = audioCtx.destination;
+
+  //httpsでないと動きません。
+  //await audioCtx.audioWorklet.addModule("./noise.js");
+  await audioCtx.audioWorklet.addModule("data:application/javascript,"+encodeURI(noiseProcessor));
+
+  async function play(){
+    await audioCtx.resume();
+
+    let noiseNode = new AudioWorkletNode(audioCtx, "Noise");
+
+    noiseNode.port.postMessage("pin");
+
+    noiseNode.port.onmessage = event =&gt; {
+      console.log(event.data);
+    }
+
+    noiseNode.connect(destinationNode);
+
+    let stopBtn = document.getElementById("stopBtn");
+    stopBtn.addEventListener("click", function(){
+      noiseNode.disconnect();
+    });
+  };
+
+  let playBtn = document.getElementById("playBtn");
+  playBtn.addEventListener("click", function(){
+    play();
+  });
+});</code></pre>
+    </div>
+
+		<div class="demo">
+      <a href="./sample/audioWorkletNoise.html" target="_blank" rel="noopener noreferrer">デモ:noise.js</a>
+    </div>
+
+		<p>
+			以下に記載されたサンプルコードは、サイン波を歪ませるオーバードライブを実装したものです。
+    </p>
+
+		<div class="sampleCode">
+    <div class="caption">html側</div>
+      <pre><code>&lt;button id="playBtn"&gt;Play&lt;/button&gt;
+&lt;button id="stopBtn"&gt;Stop&lt;/button&gt;
+&lt;input type="range" id="drvSlider" min=0 max=1 step=0.01 value=1&gt;</code></pre>
+    </div>
+
+    <div class="sampleCode">
+    <div class="caption">overdrive.js</div>
+      <pre><code>const overdriveProcessor=`
+  class OverDrive extends AudioWorkletProcessor {
+    constructor() {
+      super();
+    }
+
+    //AudioParamで管理される独自パラメーターを定義
+    //linearRampToValueAtTimeメソッドなどが使用可能に
+    static get parameterDescriptors(){
+      return [{
+        name: "drive",
+        defaultValue: 1,
+        minValue: 0,
+        maxValue: 1,
+        automationRate: "a-rate"
+      }];
+    }
+
+    process(inputs, outputs, parameters) {
+      let input  = inputs[0];
+      let output = outputs[0];
+      let driveParameter = Math.pow(0.05, Math.abs(parameters.drive[0]));
+
+      for (let channel=0; channel&lt;output.length; channel++) {
+        for(let i=0; i&lt;output[channel].length; i++){
+          if (input[channel]){
+            let d = input[channel][i]
+            if(d &lt; 0){
+              output[channel][i] = -Math.pow(-d ,driveParameter);
+            } else {
+              output[channel][i] = Math.pow(d ,driveParameter);
+            }
+          }
+        }
+      }
+      return true;
+    }
+  }
+  registerProcessor("OverDrive", OverDrive);
+`
+
+window.addEventListener("load", async function(){
+  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+  let audioCtx = new AudioContext();
+
+  let destinationNode = audioCtx.destination;
+
+  await audioCtx.audioWorklet.addModule("data:application/javascript,"+encodeURI(overdriveProcessor));
+
+  async function play(){
+    await audioCtx.resume();
+
+    let oscillatorNode = audioCtx.createOscillator();
+
+    let overdriveNode = new AudioWorkletNode(audioCtx, "OverDrive");
+    let overdriveAudioParam = overdriveNode.parameters.get("drive");
+
+    let drvSlider = document.getElementById("drvSlider")
+    drvSlider.addEventListener("input", function(event){
+      overdriveAudioParam.value = event.currentTarget.value
+    });
+    overdriveAudioParam.value = drvSlider.value;
+
+    oscillatorNode.connect(overdriveNode).connect(destinationNode);
+
+    oscillatorNode.start(audioCtx.currentTime);
+
+    let stopBtn = document.getElementById("stopBtn")
+    stopBtn.addEventListener("click", function(){
+      oscillatorNode.stop(0);
+    });
+  };
+
+  let playBtn = document.getElementById("playBtn")
+  playBtn.addEventListener("click", function(){
+    play();
+  });
+});</code></pre>
+    </div>
+
+    <div class="demo">
+      <a href="./sample/audioWorkletOverDrive.html" target="_blank" rel="noopener noreferrer">デモ:overdrive.js</a>
+    </div>
+
+	</body>
+</html>

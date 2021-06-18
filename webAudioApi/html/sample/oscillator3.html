@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>オシレーター3</title>
+		<style>
+			td{
+				text-align: center;
+			}
+		</style>
+  <head>
+
+  <body>
+	  再生ボタン:<button id="playBtn">Play</button><br>
+  	ボリューム:<input type="range" id="volSlider" min=0 max=1 step=0.1 value=1><br>
+		周波数:<input type="number" id="frequencyNumber" min=20 max=20000 value=440><br>
+		<table>
+			<tr>
+				<td>ハーモニクス:</td>
+				<td>reals</td>
+				<td>imags</td>
+			</tr>
+			<tr>
+				<td>1</td>
+				<td><input type="range" id="reals1" min=0 max=1 step=0.01 value=0></td>
+				<td><input type="range" id="imags1" min=0 max=1 step=0.01 value=1></td>
+			</tr>
+			<tr>
+    	  <td>2</td>
+      	<td><input type="range" id="reals2" min=0 max=1 step=0.01 value=0></td>
+	      <td><input type="range" id="imags2" min=0 max=1 step=0.01 value=0></td>
+  	  </tr>
+			<tr>
+	      <td>3</td>
+  	    <td><input type="range" id="reals3" min=0 max=1 step=0.01 value=0></td>
+    	  <td><input type="range" id="imags3" min=0 max=1 step=0.01 value=0></td>
+	    </tr>
+			<tr>
+    	  <td>4</td>
+      	<td><input type="range" id="reals4" min=0 max=1 step=0.01 value=0></td>
+	      <td><input type="range" id="imags4" min=0 max=1 step=0.01 value=0></td>
+  	  </tr>
+			<tr>
+      	<td>5</td>
+	      <td><input type="range" id="reals5" min=0 max=1 step=0.01 value=0></td>
+  	    <td><input type="range" id="imags5" min=0 max=1 step=0.01 value=0></td>
+    	</tr>
+		</table>
+
+  	<script>
+	    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+  	  let audioCtx = new AudioContext();
+
+			//1(DCオフセット) + 1(基本周波数) + 4(倍音)
+			let TABLE_SIZE = 6;
+
+			//cosによる合成
+			let reals = new Float32Array(TABLE_SIZE);
+			//sinによる合成
+			let imags = new Float32Array(TABLE_SIZE);
+	
+			//初期化
+			for(let i=0; i<TABLE_SIZE; i++){
+  	 		reals[i] = 0;
+    		imags[i] = 0;
+	  	}
+
+			//固定値
+  	  reals[0] = 0;
+    	imags[0] = 0;
+
+			//基本周波数を設定
+			imags[1] = 1;
+
+	    let destinationNode = audioCtx.destination;
+
+	    let volumeNode = audioCtx.createGain();
+
+	    volumeNode.connect(destinationNode);
+
+  	  function play(){
+    	  let oscillatorNode = audioCtx.createOscillator();
+
+				//PeriodicWaveインスタンスの作成
+  	  	let periodicwave = audioCtx.createPeriodicWave(reals, imags);
+
+				//oscillatorNode.typeを"custom"に設定
+				oscillatorNode.setPeriodicWave(periodicwave);
+
+				let frequencyNumber = document.getElementById("frequencyNumber");
+	      frequencyNumber.addEventListener("input", function(event){
+  	       oscillatorNode.frequency.value = event.currentTarget.value;
+    	  });
+				oscillatorNode.frequency.value = frequencyNumber.value;
+
+				//スライダーが動いた時の処理
+        for(let i=1; i<TABLE_SIZE; i++){
+          document.getElementById(`reals${i}`).addEventListener("input", function(event){
+            reals[i] = event.currentTarget.value;
+            periodicwave = audioCtx.createPeriodicWave(reals, imags);
+            oscillatorNode.setPeriodicWave(periodicwave); 
+          });
+          document.getElementById(`imags${i}`).addEventListener("input", function(event){
+            imags[i] = event.currentTarget.value;
+            periodicwave = audioCtx.createPeriodicWave(reals, imags);
+            oscillatorNode.setPeriodicWave(periodicwave);
+          });
+        }
+
+      	oscillatorNode.connect(volumeNode);
+
+	      let t0 = audioCtx.currentTime;
+
+  	    oscillatorNode.start(t0);
+
+    	  oscillatorNode.stop(t0+3);
+	    }
+
+  	  let playBtn = document.getElementById("playBtn");
+    	playBtn.addEventListener("click", function(){
+	      play();
+  	  });
+
+	    let volSlider = document.getElementById("volSlider");
+  	  volSlider.addEventListener("input", function(event){
+    	  volumeNode.gain.value = event.currentTarget.value;
+	    });
+		</script>
+  </body>
+</html>

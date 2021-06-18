@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>ボリューム</title>
+  <head>
+
+  <body>
+	  再生ボタン:<button id="playBtn">Play</button><br>
+		ボリューム:<input type="range" id="volSlider" min=0 max=1 step=0.1 value=1>
+ 
+	  <script>
+			window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+			let audioCtx = new AudioContext();
+
+			let destinationNode = audioCtx.destination;
+
+			//gainノードを作成
+			let volumeNode = audioCtx.createGain();
+
+			//接続:volumeNode => destinationNode
+			volumeNode.connect(destinationNode);
+
+	    function play(){
+  	    let oscillatorNode = audioCtx.createOscillator();
+
+	      //接続:oscillatorNode => volumeNode
+  	    oscillatorNode.connect(volumeNode);
+
+    	  let t0 = audioCtx.currentTime;
+
+      	oscillatorNode.start(t0);
+
+	      oscillatorNode.stop(t0+3);
+  	  }
+
+    	let playBtn = document.getElementById("playBtn");
+	    playBtn.addEventListener("click", async function(){
+				await audioCtx.resume();
+      	play();
+	    });
+
+			//スライダーが動いた時の処理
+			let volSlider = document.getElementById("volSlider");
+			volSlider.addEventListener("input", function(event){
+	      volumeNode.gain.value = event.currentTarget.value;
+  	  });
+	  </script>
+  </body>
+</html>         

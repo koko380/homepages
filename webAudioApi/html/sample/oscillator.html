@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head lang="ja">
+    <meta charset="UTF-8">
+    <title>オシレーター</title>
+  <head>
+
+  <body>
+		再生ボタン:<button id="playBtn">Play</button>
+
+		<script>
+			//各種ブラウザ対応
+			window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+			//AudioContextインスタンスを作成
+			let audioCtx = new AudioContext();
+
+			//出力先
+      let destinationNode = audioCtx.destination;
+
+			function play(){
+				//Ocsillatorノードを作成
+				let oscillatorNode = audioCtx.createOscillator();
+
+				//接続:oscillatorNode => destinationNode
+				oscillatorNode.connect(destinationNode);
+
+				//AudioContextインスタンスの生成を基準時として、そこからの経過時間を秒単位で格納
+				let t0 = audioCtx.currentTime;
+
+				//再生
+				oscillatorNode.start(t0);
+
+				//１秒後に停止
+				oscillatorNode.stop(t0+1);
+
+				/*
+				//1000ミリ秒後に停止
+				setTimeout(function(){
+					oscillatorNode.stop(0);
+				}, 1000);
+				*/
+			}
+
+			//ボタンが押された時の処理
+			let playBtn = document.getElementById("playBtn");
+			playBtn.addEventListener("click", async function(){
+				//Chromeの自動再生対策
+				await audioCtx.resume();
+				play();
+			});
+		</script>
+  </body>
+</html>

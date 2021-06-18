@@ -1,0 +1,43 @@
+.center{
+	display: table;
+  margin: auto;
+  padding: 30px;
+  text-align: center;
+  border-top: solid 1px;
+  border-bottom: solid 1px;
+}
+
+p{
+  margin: 1em 0;
+}
+
+.sampleCode{
+  position: relative;
+  padding-left: 15px;
+  padding-right: 15px;
+	margin: 3em 0;
+  border: double 3px;
+  box-shadow: 3px 3px 10px gray;
+}
+.caption{
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: white;
+  transform: translateY(-50%) translateX(1em);
+}
+
+td{
+	text-align: center;
+}
+
+.imgCenter{
+	text-align: center;
+	margin: 1em 0;
+}
+
+figcaption{
+	color: grey;
+	font-size: 0.8em;
+	text-align: center;
+}
